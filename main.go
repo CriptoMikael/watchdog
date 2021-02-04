@@ -29,7 +29,7 @@ func main() {
 			case <-c:
 				continue
 			case <-time.After(*timeout):
-				fmt.Println("No answer 10 sec")
+				fmt.Println("No answer", timeout.String())
 			}
 		}
 	}()
