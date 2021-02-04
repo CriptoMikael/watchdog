@@ -4,6 +4,6 @@ Watchdog is the tool which reboots host when host can't be accessed from network
 
 ## Параметры запуска
 ```
--url        URL for check (default: 8090)
+-url        URL for check (default: :8090)
 -timeout    Maximum waiting time between packets (default: 30s)
 ```
