@@ -1,25 +1,37 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
+	"time"
 )
 
-func hello(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "hello\n")
-}
+var lastTime time.Time
+var c chan bool
 
-func headers(w http.ResponseWriter, req *http.Request) {
-	for name, headers := range req.Header {
-		for _, h := range headers {
-			fmt.Fprintf(w, "%v: %v\n", name, h)
-		}
-	}
+func ping(w http.ResponseWriter, req *http.Request) {
+	c <- true
 }
 
 func main() {
-	http.HandleFunc("/hello", hello)
-	http.HandleFunc("/headers", headers)
+	timeout := flag.Duration("timeout", 30*time.Second, "Timeout for ping in sec (default: 30 sec)")
+	port := flag.String("port", "8090", "Port for check")
+	flag.Parse()
 
-	http.ListenAndServe(":8090", nil)
+	c = make(chan bool)
+
+	http.HandleFunc("/", ping)
+	go func() {
+		http.ListenAndServe(":"+*port, nil)
+	}()
+
+	for {
+		select {
+		case <-c:
+			continue
+		case <-time.After(*timeout):
+			fmt.Println("No answer 10 sec")
+		}
+	}
 }
